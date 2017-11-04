@@ -1,4 +1,4 @@
 def main():
     print('This is an education scheduling AI project')
-
+    print('by IC KMITL students')
 main()
