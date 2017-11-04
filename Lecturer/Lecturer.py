@@ -21,3 +21,6 @@ class Lecturer:
 
     def addCourse(self, course):
         self.Courses.append(course)
+
+    def delCourse(self, course):
+        self.Courses.remove(course)
