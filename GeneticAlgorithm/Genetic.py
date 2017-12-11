@@ -29,16 +29,19 @@ def random_function(limit_random, room_list, course_list, lecturer_list, student
     for i in range(len(random_list)):
         print(i, 'roomslot:')
         for j in random_list[i][0]:
+            print(j.room_name)
             j.print_timeslot()
 
         print()
         print(i, 'lecturerslot:')
         for k in random_list[i][1]:
+            print(k.lecturer_name)
             k.print_timeslot()
 
         print()
         print(i, 'Studentgroupslot:')
         for l in random_list[i][2]:
+            print(l.student_group)
             l.print_timeslot()
 
         print()
