@@ -9,16 +9,44 @@ def get_key(item):
     return item[0]
 
 def crossover(mating_pool):
-    pass
 
-def create_mating_pool(evaluate_dict, number_of_generation):
+    result_lst = []  # list of result
+    for mate in mating_pool:  # 1
+        rnum = random.randrange(21)
+        mate_result = []  # list of sumed mate
+        for ielement in range(len(mate[0])):  # 3
+            element_lst = []  # list of sumed element
+            for ilst in range(len(mate[0][ielement])):  # 4
+                result = sumup(mate[0][ielement][ilst], mate[1][ielement][ilst], rnum,ielement)  # sumed element
+                element_lst.append(result)
+            mate_result.append(element_lst)
+        result_lst.append(mate_result)
+    return result_lst
+
+def sumup(lstA, lstB, rnum,t):
+    result=[]
+    if(t == 1):
+        result=lstA.course_timeslot[:rnum]
+        result.extend(lstB.course_timeslot[rnum:21])
+    elif(t==0):
+        result = lstA.room_timeslot[:rnum]
+        result.extend(lstB.room_timeslot[rnum:21])
+    elif(t==2):
+        result = lstA.student_group_timeslot[:rnum]
+        result.extend(lstB.student_group_timeslot[rnum:21])
+    return result
+
+def create_mating_pool(evaluate_dict):
     mating_pool = []
     sample = []
     sorted_evaluate_dict = sorted(evaluate_dict, key = get_key)
-
+    '''
     for i in range(len(sorted_evaluate_dict)):
         if(sorted_evaluate_dict[i][0] < 1000000):
             sample.append(sorted_evaluate_dict[i])
+    '''
+    for i in sorted_evaluate_dict:
+        sample.append(i)
 
     print('sample: ', len(sample))
     for j in range(len(sample)):
@@ -27,7 +55,7 @@ def create_mating_pool(evaluate_dict, number_of_generation):
 
     return mating_pool
 
-def evaluate(schedule):
+def create_evaluate_list(schedule):
     penalties = []
     for rnd in range(len(schedule)):
         room_list = schedule[rnd][0]
@@ -62,14 +90,13 @@ def evaluate(schedule):
 def evaluate2(schedule,courses):
     penalties = []
     for rnd in range(len(schedule)):
-        count=0
-        penalty = 0
+        count = 0
         room_list = schedule[rnd][0]
-        chk_list = schedule[rnd][0]
         penalty = 0
         for room_sched in room_list:
-            for slot in range(len(room_sched.room_timeslot)):
-                if len(room_sched.room_timeslot[slot]) == 1:
+            for slot in range(len(room_sched)):
+                if(len(room_sched[slot])) == 1:
+                    chk_list = copy.deepcopy(room_sched)
                     chker = chk_list.pop(slot)
                     if(chker in chk_list):
                         penalty +=1000000
@@ -79,14 +106,14 @@ def evaluate2(schedule,courses):
                         penalty += 50
                     if slot % 3 == 2:
                         penalty += 25
-            if(count!=len(courses)):
+            if(count != len(courses)):
                 penalty +=1000000
-            count=0
+            count = 0
         penalties.append(penalty)
-
+    print(penalties)
     return penalties
 
-def random_function(limit_random, room_list, course_list, lecturer_list, student_group_list):
+def create_random_list(limit_random, room_list, course_list, lecturer_list, student_group_list):
     random_list = []
     for i in range(limit_random):
         a = copy.deepcopy(room_list)
@@ -139,14 +166,42 @@ def create_evaluate_dict(random_list, evaluate_list):
         evaluate_dict.append([evaluate_list[i],random_list[i]])
     return evaluate_dict
 
+def create_random_mating_pool(limit_random, mating_pool):
+    random_mating_pool = []
+    for i in range (limit_random):
+        a = random.randint(0, len(mating_pool)) - 1
+        b = random.randint(0, len(mating_pool)) - 1
+
+        random_mating_pool.append([mating_pool[a][1], mating_pool[b][1]])
+    return random_mating_pool
+
 def genetic_function(limit_random, number_of_generation, room_list, course_list, lecturer_list, student_group_list):
-    random_list = random_function(limit_random, room_list, course_list, lecturer_list, student_group_list)
-    evaluate_list = evaluate(random_list)
+    random_list = create_random_list(limit_random, room_list, course_list, lecturer_list, student_group_list)
+    evaluate_list = create_evaluate_list(random_list)
     evaluate_dict = create_evaluate_dict(random_list, evaluate_list)
     mating_pool = create_mating_pool(evaluate_dict)
-    next_generation = crossover(mating_pool)
-    for i in range(number_of_generation):
-        genetic_function2(next_generation, room_list, course_list, lecturer_list, student_group_list)
+    random_mating_pool = create_random_mating_pool(limit_random, mating_pool)
+    next_generation = crossover(random_mating_pool)
+
+    for i in range(number_of_generation - 2):
+        evaluate_list = evaluate2(next_generation, course_list)
+        evaluate_dict = create_evaluate_dict(next_generation, evaluate_list)
+        mating_pool = create_mating_pool(evaluate_dict)
+        '''
+        while(len(mating_pool) == 0):
+            next_generation = crossover(random_mating_pool)
+            evaluate_list = evaluate2(next_generation, course_list)
+            evaluate_dict = create_evaluate_dict(next_generation, evaluate_list)
+            mating_pool = create_mating_pool(evaluate_dict)
+        '''
+        random_mating_pool = create_random_mating_pool(limit_random, mating_pool)
+        next_generation = crossover(random_mating_pool)
+
+    evaluate_list = evaluate2(next_generation, course_list)
+    evaluate_dict = create_evaluate_dict(random_list, evaluate_list)
+
+    return evaluate_dict[0]
+
 
 def genetic_function2(limit_random, room_list, course_list, lecturer_list, student_group_list):
     evaluate2(limit_random, course_list)
@@ -156,7 +211,7 @@ def main():
     y2= Student_group.StudentGroup('y2')
     y3= Student_group.StudentGroup('y3')
     y4= Student_group.StudentGroup('y4')
-
+    print(type(y1))
     ic01 = Room.Room('ic01')
     ic02 = Room.Room('ic02')
     ic03 = Room.Room('ic03')
@@ -219,6 +274,6 @@ def main():
     student_group_list = [y1, y2, y3, y4]
     limit_random = eval(input('limit random: '))
     number_of_generation = eval(input('number of generation: '))
-    genetic_function(limit_random, number_of_generation, room_list, course_list, lecturer_list, student_group_list)
-
+    best_output = genetic_function(limit_random, number_of_generation, room_list, course_list, lecturer_list, student_group_list)
+    print(best_output[0])
 main()
