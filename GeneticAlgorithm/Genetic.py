@@ -178,30 +178,32 @@ def create_random_mating_pool(limit_random, mating_pool):
 def genetic_function(limit_random, number_of_generation, room_list, course_list, lecturer_list, student_group_list):
     random_list = create_random_list(limit_random, room_list, course_list, lecturer_list, student_group_list)
     evaluate_list = create_evaluate_list(random_list)
-    evaluate_dict = create_evaluate_dict(random_list, evaluate_list)
+    evaluate_dict = create_evaluate_dict(random_list, evaluate_list) # list of [[evaluate cost, [[room obj], [lecturer obj], [std obj]]]]
+    '''
     mating_pool = create_mating_pool(evaluate_dict)
     random_mating_pool = create_random_mating_pool(limit_random, mating_pool)
     next_generation = crossover(random_mating_pool)
-
+    '''
+    '''
     for i in range(number_of_generation - 2):
         evaluate_list = evaluate2(next_generation, course_list)
         evaluate_dict = create_evaluate_dict(next_generation, evaluate_list)
-        mating_pool = create_mating_pool(evaluate_dict)
-        '''
+        #mating_pool = create_mating_pool(evaluate_dict)
+        
         while(len(mating_pool) == 0):
             next_generation = crossover(random_mating_pool)
             evaluate_list = evaluate2(next_generation, course_list)
             evaluate_dict = create_evaluate_dict(next_generation, evaluate_list)
             mating_pool = create_mating_pool(evaluate_dict)
-        '''
+        
         random_mating_pool = create_random_mating_pool(limit_random, mating_pool)
         next_generation = crossover(random_mating_pool)
 
     evaluate_list = evaluate2(next_generation, course_list)
     evaluate_dict = create_evaluate_dict(random_list, evaluate_list)
-
+    
     return evaluate_dict[0]
-
+    '''
 
 def genetic_function2(limit_random, room_list, course_list, lecturer_list, student_group_list):
     evaluate2(limit_random, course_list)
